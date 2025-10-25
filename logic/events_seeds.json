@@ -1,0 +1,24 @@
+[
+  {
+    "key": "festival",
+    "text": "Festival week! Taverns pay extra for Ale; Spices and Cloth sell briskly.",
+    "cat_multipliers": { "processed": 1.10, "textile": 1.08, "luxury": 1.12 },
+    "item_multipliers": { "ale": 1.20 }
+  },
+  {
+    "key": "harvest_boom",
+    "text": "Bountiful fields! Agricultural goods are plentiful.",
+    "cat_multipliers": { "agricultural": 0.88 }
+  },
+  {
+    "key": "poor_harvest",
+    "text": "Blight in nearby farms; food runs scarce.",
+    "cat_multipliers": { "agricultural": 1.18, "processed": 1.10 }
+  },
+  {
+  "key": "bandit_raids",
+  "text": "Bandits prowl the roads. Risky to haul valuables—luxury prices climb.",
+  "cat_multipliers": { "luxury": 1.15, "textile": 1.06 },
+  "item_multipliers": { "spices": 1.12, "salt": 1.08 }
+  }
+]
