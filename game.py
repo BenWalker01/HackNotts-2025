@@ -29,7 +29,8 @@ class Game:
             elif keys[pygame.K_s]:
                 self.player.move_down()
 
+            self.map.group.update()
+            self.map.group.center(self.player.rect.center)
             self.map.update_screen()
-            self.player.draw()
             pygame.display.flip()
             clock.tick(60)

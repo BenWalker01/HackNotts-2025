@@ -2,10 +2,12 @@ import pygame
 import os
 
 SPEED = 2
+SCALE = 0.45
 
 
-class Player:
+class Player(pygame.sprite.Sprite):
     def __init__(self, window):
+        super().__init__()
         self.x, self.y = (100, 100)
         self.window = window
 
@@ -14,7 +16,9 @@ class Player:
         self.direction = "u"
         self.animation_frame = 0
         self.animation_speed = 0.15
-        self.current_frame = self.frames_walk[self.direction][0]
+
+        self.image = self.frames_walk[self.direction][0]
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
     def _load_sheets(self):
         frames_folder_root = "assets/character/models/sequences/leather_armor"
@@ -36,6 +40,8 @@ class Player:
             for i in range(4):
                 frame = img.subsurface(pygame.Rect(
                     0, i * height, width, height))
+                frame = pygame.transform.scale(
+                    frame, (int(width * SCALE), int(height * SCALE)))
                 frames_per_direction[order[i]].append(frame)
         return frames_per_direction
 
@@ -43,13 +49,16 @@ class Player:
         self.animation_frame += self.animation_speed
         self.animation_frame = self.animation_frame % len(
             self.frames_walk[self.direction])
-        self.current_frame = self.frames_walk[self.direction][int(
+        self.image = self.frames_walk[self.direction][int(
             self.animation_frame)]
 
-    def draw(self):
+    def update(self):
         if self.walking:
             self.animate()
-        self.window.screen.blit(self.current_frame, (self.x, self.y))
+        self.rect.topleft = (self.x, self.y)
+
+    def draw(self):
+        self.window.screen.blit(self.image, self.rect)
 
     def move_up(self):
         self.direction = "u"
