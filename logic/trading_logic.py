@@ -21,7 +21,7 @@ class Market:
         self.margin_buy  = 0.10  # vendor buys cheaper
 
         self.rng = random.Random(42)
-        self._events = self._load_events("events_seeds.json")
+#        self._events = self._load_events("events_seeds.json")
 
     # ---------- validation helpers ----------
     def _require_vendor(self, vendor: str):
@@ -75,5 +75,3 @@ class Market:
         self.player_gold += revenue
         return revenue
 
-market= Market()
-print(market.vendors)
