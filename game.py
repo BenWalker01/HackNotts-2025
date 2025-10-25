@@ -18,6 +18,9 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    print(pygame.mouse.get_pos())
+
             keys = pygame.key.get_pressed()
             self.player.walking = False
             if keys[pygame.K_a]:

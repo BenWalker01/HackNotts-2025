@@ -20,7 +20,7 @@ class Map:
         map_data = pyscroll.data.TiledMapData(tmx_data)
         map_layer = pyscroll.orthographic.BufferedRenderer(
             map_data, self.screen.get_size())
-        map_layer.zoom = 3  # hhhm
+        map_layer.zoom = 3
 
         self.group = pyscroll.PyscrollGroup(
             map_layer=map_layer, default_layer=1)
