@@ -6,7 +6,7 @@
     "item_multipliers": { "ale": 1.20 }
   },
   {
-    "key": "harvest_boon",
+    "key": "harvest_boom",
     "text": "Bountiful fields! Agricultural goods are plentiful.",
     "cat_multipliers": { "agricultural": 0.88 }
   },
