@@ -3,7 +3,7 @@ from economy_bootstrap import ITEMS, VENDORS
 class Market:
     def __init__(self):
         self.items = ITEMS
-        self.vendors = {name: {"stock": {product: max(1, quantity/2) for product, quantity in data["target_stock"].items()}} for name, data in VENDORS.items()}
+        self.vendors = {name: {"stock": {product: max(1, quantity//2) for product, quantity in data["target_stock"].items()}} for name, data in VENDORS.items()}
         self.player_gold = 60
         self.player_inv = {}
 
@@ -11,10 +11,12 @@ class Market:
         self.margin_buy  = 0.10  # vendor buys cheaper
 
     def quote_buy(self, vendor, item, qty=1):
+        if item not in self.items: raise ValueError(f"Unknown item '{item}'")
         base = self.items[item]["base_price"]
         return int(round(base * (1 + self.margin_sell) * qty))
 
     def quote_sell(self, vendor, item, qty=1):
+        if item not in self.items: raise ValueError(f"Unknown item '{item}'")
         base = self.items[item]["base_price"]
         return int(round(base * (1 - self.margin_buy) * qty))
 
