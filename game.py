@@ -18,18 +18,22 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    print(pygame.mouse.get_pos())
+
             keys = pygame.key.get_pressed()
             self.player.walking = False
             if keys[pygame.K_a]:
                 self.player.move_left()
-            elif keys[pygame.K_d]:
+            if keys[pygame.K_d]:
                 self.player.move_right()
-            elif keys[pygame.K_w]:
+            if keys[pygame.K_w]:
                 self.player.move_up()
-            elif keys[pygame.K_s]:
+            if keys[pygame.K_s]:
                 self.player.move_down()
 
+            self.map.group.update()
+            self.map.group.center(self.player.rect.center)
             self.map.update_screen()
-            self.player.draw()
             pygame.display.flip()
             clock.tick(60)
