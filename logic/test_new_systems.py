@@ -2,7 +2,7 @@
 Test script for new systems: storage, deals, progression, upgrades
 """
 
-from api_facade import *
+from market_api import *
 
 print("=" * 50)
 print("INITIALIZING GAME")
