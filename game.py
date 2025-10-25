@@ -16,18 +16,16 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_a:
-                        self.player.move_left()
-                        
-                    if event.key == pygame.K_d:
-                        self.player.move_right()
-                        
-                    if event.key == pygame.K_w:
-                        self.player.move_up()
-                        
-                    if event.key == pygame.K_s:
-                        self.player.move_down()
+                keys = pygame.key.get_pressed()
+                
+                if keys[pygame.K_a]:
+                    self.player.move_left()
+                if keys[pygame.K_d]:
+                    self.player.move_right()
+                if keys[pygame.K_w]:
+                    self.player.move_up()
+                if keys[pygame.K_s]:
+                    self.player.move_down()
             
             self.map.update_screen()
             self.player.draw()
