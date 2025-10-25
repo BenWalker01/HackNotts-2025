@@ -5,6 +5,8 @@ from map import Map
 SCALE = 0.30
 SPEED = 3 * SCALE
 
+HITBOX_MARGIN = 5
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, window):
@@ -67,35 +69,35 @@ class Player(pygame.sprite.Sprite):
     def move_up(self):
         self.direction = "u"
         new_y = self.y - SPEED
-        # Check top-left and top-right
-        if (self.window.can_move_to(self.x, new_y) and
-                self.window.can_move_to(self.x + self.width - 1, new_y)):
-            self.y -= SPEED
+        mid_x = self.x + self.width // 2
+        if self.window.can_move_to(mid_x, new_y + HITBOX_MARGIN):
+            self.y = new_y
         self.walking = True
+        self.rect.topleft = (self.x, self.y)
 
     def move_down(self):
         self.direction = "d"
         new_y = self.y + SPEED
-        # Check bottom-left and bottom-right
-        if (self.window.can_move_to(self.x, new_y + self.height - 1) and
-                self.window.can_move_to(self.x + self.width - 1, new_y + self.height - 1)):
-            self.y += SPEED
+        mid_x = self.x + self.width // 2
+        if self.window.can_move_to(mid_x, new_y + self.height - HITBOX_MARGIN):
+            self.y = new_y
         self.walking = True
+        self.rect.topleft = (self.x, self.y)
 
     def move_left(self):
         self.direction = "l"
         new_x = self.x - SPEED
-        # Check top-left and bottom-left
-        if (self.window.can_move_to(new_x, self.y) and
-                self.window.can_move_to(new_x, self.y + self.height - 1)):
-            self.x -= SPEED
+        mid_y = self.y + self.height // 2
+        if self.window.can_move_to(new_x + HITBOX_MARGIN, mid_y):
+            self.x = new_x
         self.walking = True
+        self.rect.topleft = (self.x, self.y)
 
     def move_right(self):
         self.direction = "r"
         new_x = self.x + SPEED
-        # Check top-right and bottom-right
-        if (self.window.can_move_to(new_x + self.width - 1, self.y) and
-                self.window.can_move_to(new_x + self.width - 1, self.y + self.height - 1)):
-            self.x += SPEED
+        mid_y = self.y + self.height // 2
+        if self.window.can_move_to(new_x + self.width - HITBOX_MARGIN, mid_y):
+            self.x = new_x
         self.walking = True
+        self.rect.topleft = (self.x, self.y)
