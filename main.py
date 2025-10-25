@@ -1,18 +1,17 @@
 import pygame
-pygame.init()
-
 from map import Map
+from player import Player
+from game import Game
 
+pygame.init()
 def main():
     map = Map()
+    player = Player(map)
+    game = Game(player,map)
     
-    running = True
-    while running:
-        running = map.handle_event()
-        map.update_screen()
-        
-        
+    game.run()        
     
     
 if __name__ == "__main__":
     main()
+    pygame.quit()
