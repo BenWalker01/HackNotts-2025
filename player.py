@@ -1,8 +1,8 @@
 import pygame
 import os
 
-SPEED = 2
-SCALE = 0.45
+SCALE = 0.30
+SPEED = 3 * SCALE
 
 
 class Player(pygame.sprite.Sprite):
