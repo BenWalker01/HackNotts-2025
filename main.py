@@ -9,6 +9,7 @@ pygame.init()
 def main():
     map = Map()
     player = Player(map)
+    map.add_player(player)
     game = Game(player, map)
     game.run()
 
