@@ -1,5 +1,6 @@
 import pygame
 import os
+from map import Map
 
 SCALE = 0.30
 SPEED = 3 * SCALE
@@ -9,7 +10,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, window):
         super().__init__()
         self.x, self.y = (100, 100)
-        self.window = window
+        self.window: Map = window
 
         self.frames_walk = self._load_sheets()
         self.walking = False
@@ -19,6 +20,9 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.frames_walk[self.direction][0]
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
+
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
 
     def _load_sheets(self):
         frames_folder_root = "assets/character/models/sequences/leather_armor"
@@ -62,20 +66,36 @@ class Player(pygame.sprite.Sprite):
 
     def move_up(self):
         self.direction = "u"
-        self.y -= SPEED
+        new_y = self.y - SPEED
+        # Check top-left and top-right
+        if (self.window.can_move_to(self.x, new_y) and
+                self.window.can_move_to(self.x + self.width - 1, new_y)):
+            self.y -= SPEED
         self.walking = True
 
     def move_down(self):
         self.direction = "d"
+        new_y = self.y + SPEED
+        # Check bottom-left and bottom-right
+        if (self.window.can_move_to(self.x, new_y + self.height - 1) and
+                self.window.can_move_to(self.x + self.width - 1, new_y + self.height - 1)):
+            self.y += SPEED
         self.walking = True
-        self.y += SPEED
 
     def move_left(self):
         self.direction = "l"
-        self.x -= SPEED
+        new_x = self.x - SPEED
+        # Check top-left and bottom-left
+        if (self.window.can_move_to(new_x, self.y) and
+                self.window.can_move_to(new_x, self.y + self.height - 1)):
+            self.x -= SPEED
         self.walking = True
 
     def move_right(self):
         self.direction = "r"
-        self.x += SPEED
+        new_x = self.x + SPEED
+        # Check top-right and bottom-right
+        if (self.window.can_move_to(new_x + self.width - 1, self.y) and
+                self.window.can_move_to(new_x + self.width - 1, self.y + self.height - 1)):
+            self.x += SPEED
         self.walking = True
