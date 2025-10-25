@@ -1,4 +1,4 @@
-from trading_logic import Market
+from .trading_logic import Market
 
 _market = None
 
@@ -35,7 +35,5 @@ def advance_day():
     return ["All quiet on the trade winds."]
 
 def get_player_state():
-    return {
-        "gold": _market.player_gold,
-        "inventory": dict(_market.player_inv),
-    }
+    return _market.get_player_summary()
+
