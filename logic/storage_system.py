@@ -22,7 +22,7 @@ class StorageManager:
         # Theft protection
         self.guard_service_active = False
         self.theft_chance = 0.05  # 5% base chance
-        self.theft_threshold = 50  # Gold value threshold
+        self.theft_threshold = 70  # Gold value threshold
         
     def get_total_home_capacity(self):
         """Calculate current home storage capacity including upgrades."""
@@ -122,7 +122,7 @@ class StorageManager:
     
     # ---------- Guard service ----------
     
-    def hire_guard(self, player_gold, cost=3):
+    def hire_guard(self, player_gold, cost=5):
         """Hire guard service for one day."""
         if player_gold < cost:
             raise ValueError("Not enough gold to hire guard")

@@ -49,6 +49,37 @@ def list_events():
     """Debug: list available event keys."""
     return _market.list_event_keys()
 
+def get_buy_snapshot(vendor: str):
+    stock = get_vendor_stock(vendor)
+    rows = []
+    for item, qty in stock.items():
+        if qty <= 0: 
+            continue
+        rows.append({
+            "item": item,
+            "qty": qty,
+            "buy_price": get_quote_buy(vendor, item, 1),
+            "weight": _market._item_weight(item)
+        })
+    # Sort by category then name if you like; here we keep as-is
+    return rows
+
+def get_sell_snapshot(vendor: str):
+    inv = get_player_state()["inventory"]
+    rows = []
+    for item, qty in inv.items():
+        rows.append({
+            "item": item,
+            "qty": qty,
+            "sell_price": get_quote_sell(vendor, item, 1),
+            "weight": _market._item_weight(item)
+        })
+    return rows
+
+def get_today_news_and_rumours():
+    return {"news": _market.get_news_today(), "rumors": _market.get_rumors_today()}
+
+
 """ NEW API ADDITIONS BELOW (AMR)"""
 
 def get_storage_info():

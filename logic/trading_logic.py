@@ -15,13 +15,13 @@ class Market:
                 }
             } for name, data in VENDORS.items()
         }
-        self.player_gold = 60
+        self.player_gold = 50
         self.player_inv = {}
 
         self.margin_sell = 0.15  # vendor markup
         self.margin_buy  = 0.10  # vendor buys cheaper
 
-        self.rng = random.Random(44)
+        self.rng = random.Random(seed if seed is not None else 44)
         events_path = os.path.join(os.path.dirname(__file__), "events_seeds.json")
         self._events = self._load_events(events_path)
         rumors_path = os.path.join(os.path.dirname(__file__), "rumors_seeds.json")
@@ -195,15 +195,13 @@ class Market:
                     "matches_event": True
                 })
 
-        for r in pool[:n]:
+        remain = max(0, n - len(out))
+        for r in pool[:remain]:
             is_true = self.rng.random() < float(r.get("truth_prob", 0.5))
             matches_event = bool(self._today_event and r.get("event_key_hint") == self._today_event.get("key"))
-            out.append({
-                "text": r["text"],
-                "is_true": is_true,
-                "matches_event": matches_event
-            })
+            out.append({"text": r["text"], "is_true": is_true, "matches_event": matches_event})
         return out
+
     
     def _event_multiplier(self, item_key: str) -> float:
         if not self._today_event:
