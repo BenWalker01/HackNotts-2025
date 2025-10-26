@@ -1,4 +1,6 @@
-from logic.api_facade import *
+from logic.market_api import *
+from logic.market_api import force_event
+from logic.market_api import list_events
 
 def line(title=""):
     print("\n" + ("-" * 60))
@@ -11,6 +13,12 @@ def show_player():
 
 def main():
     init()
+
+    s = get_storage_info()
+    ps = get_player_state()
+    print("Carry (from Market):", f"{ps['weight']:.1f}/{ps['capacity']:.1f}")
+    print("Home storage:", s["home_used"], "/", s["home_capacity"])
+
 
     vendors = get_vendors()
     print("Vendors:", vendors)
@@ -50,28 +58,48 @@ def main():
     except Exception as e:
         print(" Expected stop:", e)
 
-    # 4) Event impact + restock over several days
+    # 4) Event impact + restock over several days (news vs rumors)
     line("Event impact over 3 days (Ale, Cloth, Wheat) + restock")
     print("Zara spices stock (start):", get_vendor_stock(zara).get("spices", 0))
-    for day in range(1, 4):
-        rumors = advance_day()
-        print(f" Day {day} rumors:", rumors)
+    for i in range(1, 3 + 1):
+        day = advance_day()
+        print(f" Day {i} news:", day["news"])
+        print(f" Day {i} rumors:", [r["text"] for r in day["rumors"]])
+        for r in day["rumors"]:
+            flag = "✓" if r.get("matches_event") else "?"
+            print(f"   rumor {flag}: {r['text']} (truth roll: {r['is_true']})")
         print("  Hal ale price:",  get_quote_buy(hal,  "ale",   1))
         print("  Sven cloth price:",get_quote_buy(sven, "cloth", 1))
         print("  Hal wheat price:", get_quote_buy(hal,  "wheat", 1))
         print("  Zara spices stock:", get_vendor_stock(zara).get("spices", 0))
 
-    # 5) (Optional) Force a specific event if the facade exposes a debug hook
-    if "_force_event" in globals():
-        line("Force 'festival' (if supported by facade)")
-        try:
-            _force_event("festival")  # only works if you added it in api_facade
-            print(" Forced festival.")
-            print("  Hal ale price (festival):", get_quote_buy(hal, "ale", 1))
-            print("  Sven cloth price (festival):", get_quote_buy(sven, "cloth", 1))
-            print("  Zara spices price (festival):", get_quote_buy(zara, "spices", 1))
-        except Exception as e:
-            print(" Debug force not available:", e)
+    # 5) Force a specific event and show effects + rumor alignment
+    line("Force 'festival' (debug)")
+    print("Available events:", list_events())
+    force_event(None)
+    base = {
+        "ale":   get_quote_buy(hal,  "ale",   1),  # expect ~7 at Hal
+        "cloth": get_quote_buy(sven, "cloth", 1),  # ~8–9 depending on margins/events
+        "spices":get_quote_buy(zara, "spices",1)   # ~17–19 depending on margins
+    }
+
+    force_event("festival")
+    print(" Forced festival.")
+
+    after = {
+        "ale":   get_quote_buy(hal,  "ale",   1),  # expect 9 (6 * 1.20 * 1.10 * 1.12 → ceil 9)
+        "cloth": get_quote_buy(sven, "cloth", 1),  # small bump
+        "spices":get_quote_buy(zara, "spices",1)   # visible bump (luxury + item/category)
+    }
+
+    print("Prices baseline → festival:", base, "→", after)
+
+    day = advance_day()
+    print("News:", day["news"])
+    print("Rumors:", [r["text"] for r in day["rumors"]])
+
+    # Optional: clear the lock again
+    force_event(None)
 
     line("Done")
     show_player()

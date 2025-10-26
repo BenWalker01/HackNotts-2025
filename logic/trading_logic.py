@@ -5,7 +5,7 @@ import random
 from .economy_bootstrap import ITEMS, VENDORS
 
 class Market:
-    def __init__(self):
+    def __init__(self, seed: int | None = 44):
         self.items = ITEMS
         self.vendors = {
             name: {
@@ -15,19 +15,24 @@ class Market:
                 }
             } for name, data in VENDORS.items()
         }
-        self.player_gold = 60
+        self.player_gold = 50
         self.player_inv = {}
 
         self.margin_sell = 0.15  # vendor markup
         self.margin_buy  = 0.10  # vendor buys cheaper
 
-        self.rng = random.Random(42)
+        self.rng = random.Random(seed if seed is not None else 44)
         events_path = os.path.join(os.path.dirname(__file__), "events_seeds.json")
         self._events = self._load_events(events_path)
-
-        self.player_capacity = 30.0  # simple starting carry capacity (tweak later)
-
+        rumors_path = os.path.join(os.path.dirname(__file__), "rumors_seeds.json")
+        self._rumors = self._load_json(rumors_path)
         self._today_event = None
+        self._rumors_today = [] 
+
+        self.player_capacity = 20
+
+        self._forced_event_lock = False
+
 
     # ---------- validation helpers ----------
     def _require_vendor(self, vendor: str):
@@ -53,6 +58,35 @@ class Market:
         for itm, qty in self.player_inv.items():
             total += self._item_weight(itm) * qty
         return total
+    
+    def list_event_keys(self):
+        """For debugging: list available event keys."""
+        return [e.get("key") for e in self._events]
+
+    def force_event(self, key: str | None):
+        """
+        Manually set today's event by key (or clear with None).
+        When set, advance_day() will keep this event until you clear it.
+        """
+        if key is None:
+            self._today_event = None
+            self._forced_event_lock = False
+            return None
+        for e in self._events:
+            if e.get("key") == key:
+                self._today_event = e
+                self._forced_event_lock = True
+                self._rumors_today = self._roll_rumors_today(n=2)
+                return key
+        raise ValueError(f"Unknown event '{key}'. Available: {', '.join(self.list_event_keys())}")
+    
+    def _load_json(self, path: str):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                import json as _json
+                return _json.load(f)
+        except FileNotFoundError:
+            return []
         
     # ---------- quoting ----------
     def quote_buy(self, vendor, item, qty=1) -> int:
@@ -123,17 +157,51 @@ class Market:
                     step = max(1, int(0.25 * tgt)) # up to ~25% of target
                     stock[k] = min(tgt, have + self.rng.randint(0, step))
         
-        evt = self.rng.choice(self._events) if self._events else None
-        self._today_event = evt
+        if not self._forced_event_lock:
+            self._today_event = self.rng.choice(self._events) if self._events else None
+        self._rumors_today = self._roll_rumors_today(n=2)
 
     def get_news_today(self):
         if not self._today_event:
             return ["All quiet on the trade winds."]
         return [self._today_event.get("text", "Strange quiet in the market…")]
-
+    
     def get_rumors_today(self):
-        # For MVP, just reuse the news so it’s always true and consistent.
-        return self.get_news_today()
+        # Return structured rumors (ui can choose to show text only, or badges for truth/matches_event)
+        return self._rumors_today or []
+
+    def _roll_rumors_today(self, n=2):
+        """
+        Pick up to n rumors. Each rumor is a dict:
+        {text, is_true (rolled), matches_event (hint matches today's real event)}
+        Rumors do NOT affect prices.
+        """
+        out = []
+        if not self._rumors:
+            return out
+        pool = self._rumors[:]              # copy
+        self.rng.shuffle(pool)
+
+        # 50% chance: inject one rumor that matches today's event (if any exist)
+        if self._today_event and self.rng.random() < 0.5:
+            k = self._today_event.get("key")
+            matching = [r for r in pool if r.get("event_key_hint") == k]
+            if matching:
+                r = self.rng.choice(matching)
+                pool.remove(r)
+                out.append({
+                    "text": r["text"],
+                    "is_true": self.rng.random() < float(r.get("truth_prob", 0.5)),
+                    "matches_event": True
+                })
+
+        remain = max(0, n - len(out))
+        for r in pool[:remain]:
+            is_true = self.rng.random() < float(r.get("truth_prob", 0.5))
+            matches_event = bool(self._today_event and r.get("event_key_hint") == self._today_event.get("key"))
+            out.append({"text": r["text"], "is_true": is_true, "matches_event": matches_event})
+        return out
+
     
     def _event_multiplier(self, item_key: str) -> float:
         if not self._today_event:
