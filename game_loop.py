@@ -4,12 +4,28 @@ from map import Map
 from player import Player
 from npc import NPC
 
+INTERACT_RADIUS = 12
 
 class GameLoop:
-    def __init__(self, player, map, npcs):
+    def __init__(self, player, map, npcs, state):
         self.player: Player = player
         self.map: Map = map
         self.npcs: list[NPC] = npcs
+        self.state = state
+
+    def _nearest_npc_in_range(self, radius=INTERACT_RADIUS):
+        px, py = self.player.rect.center
+        best = None
+        best_d2 = radius * radius
+        for npc in self.npcs:
+            nx, ny = npc.rect.center
+            dx = nx - px
+            dy = ny - py
+            d2 = dx*dx + dy*dy
+            if d2 <= best_d2:
+                best = npc
+                best_d2 = d2
+        return best
 
     def run(self):
         clock = pygame.time.Clock()
@@ -19,6 +35,14 @@ class GameLoop:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
+                # NEW: handle E press to talk to nearest NPC
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                    npc = self._nearest_npc_in_range()
+                    if npc is not None:
+                        text = self.state.get_one_rumor_text()
+                        # fallback: print to console for now
+                        print("[Rumor]", text)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     print(pygame.mouse.get_pos())

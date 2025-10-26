@@ -2,6 +2,7 @@ import pygame
 from map import Map
 from player import Player
 from game_loop import GameLoop
+from game_state import GameState
 
 from npc import NPC
 
@@ -18,8 +19,10 @@ def main():
         npc = NPC(map)
         map.add_player(npc)
         npcs.append(npc)
+    
+    state = GameState()
 
-    game = GameLoop(player, map, npcs)
+    game = GameLoop(player, map, npcs, state)
     game.run()
 
 

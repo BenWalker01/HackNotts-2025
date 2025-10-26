@@ -15,6 +15,24 @@ class GameState:
         # UI state
         self.trading_vendor = None
         self.show_inventory = False
+
+        # Rumours
+        self._rumor_cursor = 0
+
+    def get_one_rumor_text(self) -> str:
+        flavor = api.get_today_news_and_rumours()
+        rumors = flavor.get("rumors", [])  # might be list[dict] or list[str]
+        if rumors:
+            # cycle so repeated presses of E show different lines
+            r = rumors[self._rumor_cursor % len(rumors)]
+            self._rumor_cursor += 1
+            return r["text"] if isinstance(r, dict) else str(r)
+
+        # fallback: show the real news if no rumors were rolled
+        news = flavor.get("news", [])
+        if news:
+            return news[0]
+        return "All quiet on the trade winds."
         
     def handle_interaction(self, player):
         """Called when player presses E near something."""
