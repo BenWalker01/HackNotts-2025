@@ -3,6 +3,7 @@ import sys
 from map import Map
 from player import Player
 from npc import NPC
+from ui_manager import UIAssets, draw_textbox_
 
 INTERACT_RADIUS = 12
 
@@ -12,6 +13,7 @@ class GameLoop:
         self.map: Map = map
         self.npcs: list[NPC] = npcs
         self.state = state
+        self.ui = UIAssets()
 
     def _nearest_npc_in_range(self, radius=INTERACT_RADIUS):
         px, py = self.player.rect.center
@@ -41,22 +43,34 @@ class GameLoop:
                     npc = self._nearest_npc_in_range()
                     if npc is not None:
                         text = self.state.get_one_rumor_text()
-                        # fallback: print to console for now
+                        screen = pygame.display.get_surface()
+                        draw_textbox_(screen, self.ui, text)
                         print("[Rumor]", text)
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_e:
+                        if self.state.dialog_visible:
+                            self.state.close_dialog()
+                        else:
+                            npc = self._nearest_npc_in_range()
+                            if npc is not None:
+                                self.state.open_rumor_dialog()
+
+                    # optional quick close keys:
+                    if event.key in (pygame.K_ESCAPE, pygame.K_SPACE):
+                        self.state.close_dialog()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     print(pygame.mouse.get_pos())
 
             keys = pygame.key.get_pressed()
             self.player.walking = False
-            if keys[pygame.K_a]:
-                self.player.move_left()
-            if keys[pygame.K_d]:
-                self.player.move_right()
-            if keys[pygame.K_w]:
-                self.player.move_up()
-            if keys[pygame.K_s]:
-                self.player.move_down()
+
+            if not self.state.dialog_visible:
+                if keys[pygame.K_a]: self.player.move_left()
+                if keys[pygame.K_d]: self.player.move_right()
+                if keys[pygame.K_w]: self.player.move_up()
+                if keys[pygame.K_s]: self.player.move_down()
 
             for npc in self.npcs:
                 npc.update()
@@ -64,5 +78,10 @@ class GameLoop:
             self.map.group.update()
             self.map.group.center(self.player.rect.center)
             self.map.update_screen()
+
+            screen = pygame.display.get_surface()
+            if self.state.dialog_visible:
+                draw_textbox_(screen, self.ui, self.state.dialog_text)
+
             pygame.display.flip()
             clock.tick(60)

@@ -19,6 +19,9 @@ class GameState:
         # Rumours
         self._rumor_cursor = 0
 
+        self.dialog_visible = False
+        self.dialog_text = ""
+
     def get_one_rumor_text(self) -> str:
         flavor = api.get_today_news_and_rumours()
         rumors = flavor.get("rumors", [])  # might be list[dict] or list[str]
@@ -33,6 +36,13 @@ class GameState:
         if news:
             return news[0]
         return "All quiet on the trade winds."
+    
+    def open_rumor_dialog(self):
+        self.dialog_text = self.get_one_rumor_text()
+        self.dialog_visible = True
+
+    def close_dialog(self):
+        self.dialog_visible = False
         
     def handle_interaction(self, player):
         """Called when player presses E near something."""

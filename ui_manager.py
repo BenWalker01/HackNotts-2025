@@ -64,17 +64,60 @@ def draw_hud_UI(screen, ui_assets):
     # Draw the HUD panel
     screen.blit(ui_assets.hud_panel, (hud_x, hud_y))
 
-def draw_textbox_(screen, ui_assets):
-    # Get the screen dimensions
-    screen_width = screen.get_width()
-    screen_height = screen.get_height()
-    
-    # Calculate position to center the scroll panel
-    scroll_x = (screen_width - ui_assets.scroll_panel.get_width()) // 2
-    scroll_y = (screen_height - ui_assets.scroll_panel.get_height()) // 2
-    
-    # Draw the scroll panel centered
-    screen.blit(ui_assets.scroll_panel, (scroll_x, scroll_y))
+def _blit_wrapped_text(screen, text, font, color, rect, line_height=4):
+    """Render text inside rect with word-wrapping. Returns the last y used."""
+    x, y, w, h = rect
+    space = font.size(" ")[0]
+    max_width = w
+    words = text.split(" ")
+    line = ""
+    cur_y = y
+    for word in words:
+        test = f"{line}{word} "
+        if font.size(test)[0] <= max_width:
+            line = test
+        else:
+            surf = font.render(line.rstrip(), True, color)
+            screen.blit(surf, (x, cur_y))
+            cur_y += surf.get_height() + line_height
+            line = f"{word} "
+    if line:
+        surf = font.render(line.rstrip(), True, color)
+        screen.blit(surf, (x, cur_y))
+        cur_y += surf.get_height() + line_height
+    return cur_y
+
+def draw_textbox_(screen, ui_assets, text: str):
+    overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 120))
+    screen.blit(overlay, (0, 0))
+
+    # Center scroll panel
+    sw, sh = screen.get_width(), screen.get_height()
+    panel = ui_assets.scroll_panel
+    px = (sw - panel.get_width()) // 2
+    py = (sh - panel.get_height()) // 2
+    screen.blit(panel, (px, py))
+
+    # Text area with padding
+    pad = 28
+    text_rect = pygame.Rect(
+        px + pad, py + pad, panel.get_width() - 2 * pad, panel.get_height() - 2 * pad
+    )
+
+    # Load a readable font
+    font_path = os.path.join('assets', 'font.ttf')
+    font = pygame.font.Font(font_path, 22)
+
+    # Header (optional)
+    header = "Common-Folk Talk"
+    header_surf = font.render(header, True, (56, 34, 12))
+    screen.blit(header_surf, (text_rect.x, text_rect.y))
+    body_rect = text_rect.copy()
+    body_rect.y += header_surf.get_height() + 8
+
+    # Body
+    _blit_wrapped_text(screen, text, font, (28, 16, 8), body_rect)
 
 def draw_menu_UI(screen, ui_assets):
     # Get the screen dimensions
