@@ -126,6 +126,7 @@ class Player(pygame.sprite.Sprite):
         Check if player is near a building in the main map.
         If close enough, store which one.
         """
+        print("Checking close")
         # Only check for buildings if in the main map
         if current_map.path.endswith("baseMap.tmx"):
             for name, info in BUILDINGS.items():
@@ -134,6 +135,7 @@ class Player(pygame.sprite.Sprite):
                 p_y = self.y + self.height // 2
                 dist = math.dist((p_x, p_y), (b_x, b_y))
                 if dist <= 40:
+                    print("near ")
                     self.near_building = info
                     return
             self.near_building = None

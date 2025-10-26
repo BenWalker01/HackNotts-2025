@@ -1,4 +1,5 @@
-import pygame, sys
+import pygame
+import sys
 from map import Map
 from player import Player
 from npc import NPC
@@ -8,14 +9,16 @@ import logic.economy_bootstrap as eb
 
 INTERACT_RADIUS = 12
 
+
 class GameLoop:
     def __init__(self, player, maps: dict[str, Map], npcs, state):
         self.player: Player = player
         self.maps = maps
-        self.current_map = "market"   
+        self.current_map = "main"
         self.map: Map = self.maps[self.current_map]
         self.player_positions = {name: None for name in self.maps}
-        self.player_positions[self.current_map] = getattr(self.player, "rect", None).topleft
+        self.player_positions[self.current_map] = getattr(
+            self.player, "rect", None).topleft
         try:
             self.map.add_player(self.player)
         except Exception:
@@ -33,7 +36,7 @@ class GameLoop:
     def load_map(self, name: str):
         """Switch to another map (e.g., tavern/market) and re-center camera."""
         if name not in self.maps:
-            print(f"[Map] Unknown map '{name}'"); 
+            print(f"[Map] Unknown map '{name}'")
             return
 
         # save current position for return trips
@@ -53,11 +56,13 @@ class GameLoop:
         if getattr(self.player, "rect", None):
             self.player.rect.topleft = spawn
             # keep x/y in sync if your Player uses both
-            if hasattr(self.player, "x"): self.player.x = spawn[0]
-            if hasattr(self.player, "y"): self.player.y = spawn[1]
+            if hasattr(self.player, "x"):
+                self.player.x = spawn[0]
+            if hasattr(self.player, "y"):
+                self.player.y = spawn[1]
 
         # update player→map links
-        if hasattr(self.player, "set_map"): 
+        if hasattr(self.player, "set_map"):
             self.player.set_map(self.map)
         try:
             self.map.add_player(self.player)
@@ -67,7 +72,6 @@ class GameLoop:
         # center camera and redraw
         self.map.group.center(self.player.rect.center)
         self.map.update_screen()
-
 
     def _nearest_npc_in_range(self, radius=INTERACT_RADIUS):
         px, py = self.player.rect.center
@@ -107,9 +111,13 @@ class GameLoop:
         clock = pygame.time.Clock()
         running = True
         while running:
+
+            self.player.check_near_building(self.maps[self.current_map])
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit(); sys.exit()
+                    pygame.quit()
+                    sys.exit()
 
                 if event.type == pygame.KEYDOWN:
                     # Talk to NPC / toggle textbox
@@ -127,8 +135,9 @@ class GameLoop:
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         if self.current_map == "main" and getattr(self.player, "near_building", None):
-                            target = self.player.near_building.get("target_map")
-                            if target: 
+                            target = self.player.near_building.get(
+                                "target_map")
+                            if target:
                                 self.load_map(target)
                         elif self.current_map != "main":
                             self.load_map("main")
@@ -142,10 +151,14 @@ class GameLoop:
 
             # freeze movement while dialog open
             if not self.state.dialog_visible:
-                if keys[pygame.K_a]: self.player.move_left()
-                if keys[pygame.K_d]: self.player.move_right()
-                if keys[pygame.K_w]: self.player.move_up()
-                if keys[pygame.K_s]: self.player.move_down()
+                if keys[pygame.K_a]:
+                    self.player.move_left()
+                if keys[pygame.K_d]:
+                    self.player.move_right()
+                if keys[pygame.K_w]:
+                    self.player.move_up()
+                if keys[pygame.K_s]:
+                    self.player.move_down()
 
             # update only NPCs on the current map
             for npc in self.npcs:
