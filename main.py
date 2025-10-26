@@ -1,7 +1,7 @@
 import pygame
 from map import Map
 from player import Player
-from game import Game
+from game_loop import GameLoop
 
 pygame.init()
 
@@ -10,7 +10,7 @@ def main():
     map = Map()
     player = Player(map)
     map.add_player(player)
-    game = Game(player, map)
+    game = GameLoop(player, map)
     game.run()
 
 
