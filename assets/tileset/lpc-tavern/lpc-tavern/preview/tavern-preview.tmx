@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="22" height="12" tilewidth="32" tileheight="32" infinite="0" nextlayerid="16" nextobjectid="16">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="22" height="22" tilewidth="32" tileheight="32" infinite="0" nextlayerid="17" nextobjectid="16">
  <tileset firstgid="1" source="floors.tsx"/>
  <tileset firstgid="2049" source="walls.tsx"/>
  <tileset firstgid="8193" name="flute" tilewidth="64" tileheight="64" tilecount="273" columns="13">
@@ -337,44 +337,41 @@
   <image source="container.png" trans="ff00ff" width="512" height="2048"/>
  </tileset>
  <tileset firstgid="12212" source="../../../Tile-set - Toen's Medieval Strategy (16x16) - v.1.0.tsx"/>
- <layer id="3" name="Floor" width="22" height="12">
+ <layer id="3" name="Floor" width="22" height="22">
   <data encoding="base64" compression="zlib">
-   eJxr52RgcOOiLm4DmskOpBnFGBiYqISZgZiVC2KuI5DtRCXsjGRuI5DdRCXcjGTuWRbq4lFzR81FN9cdmOeOURm7ATEAoHCgVw==
+   eJxr52RgcOOiLm4DmskOpBnFGBiYqISZgZiVC2KuI5DtRCXsjGRuI5DdRCXcjGTuWRbq4lFzR81FN9cdmOeOURm7AfEoGAWjgH4AAOvJoFc=
   </data>
  </layer>
- <layer id="1" name="Tile Layer 1" width="22" height="12">
+ <group id="16" name="Group Layer 1">
+  <layer id="1" name="Tile Layer 1" width="22" height="22">
+   <data encoding="base64" compression="zlib">
+   eJxjYBgFxIAydQaGbUBcDsSt6tQxcznQnGlAfA2IpwPxUiqZiw6O0MhcQuA5Fnvr5RHhB6NBYiDQog7ByGLoenGZu18eEX4wej9UfR2QXw/Ei9UhYs1AuhHKR1aHDfwHyl2FxtF1IG5Th4iB6HlAPB9NbCEQLwHiBqgYsWCZOiqNS2zBAMXlKBgFo4D2AAANZioo
+  </data>
+  </layer>
+  <layer id="2" name="Tile Layer 2" width="22" height="22">
+   <data encoding="base64" compression="zlib">
+   eJxjYBhewESZgcEViN2U8auzwyNvpo5gm0PZIUD1oUAcRsBcfOCLGoL9VQ1TvhFq10IWVEwIiAD1hUKxqDqm/EIizK3Fom830I17oHgvFvfCwAeg3o9Q/AnNnLlYzKUG2IvF3K1AsW1AvJ0IO5eoYBe/i0XvEXVU+gASfzGaGAw0keHvB1j0oIsdoVF4joJRMAoGHgAAWsglew==
+  </data>
+  </layer>
+  <layer id="7" name="Tile Layer 3" width="22" height="22">
+   <data encoding="base64" compression="zlib">
+   eJxjYKAdkFBDsL+rMDD8VoGwL6iiqoPxxZHUI7NBQBKJr4HEZgfq5Ybqf4BmLoyvjqReHc1cTSS+BZocIWCuhp0NApZYzJJBct9fFcLmJygzMCQqk+YmXlXCagqAZhaimfsai3vcgX7wgGJPPGGDT91VNHNDsZhDjpgHmrkbgP4+ChR7CvRXF1QuFaoeJJYDxGnKELF0ZUy9uEApFnfcwhJWN9DEYpWx6x0Fo2AUjAJcAAB9LiF7
+  </data>
+  </layer>
+ </group>
+ <layer id="6" name="Tile Layer 4" width="22" height="22">
   <data encoding="base64" compression="zlib">
-   eJxjYBgFxIAydQaGbUBcDsSt6tQxcznQnGlAfA2IpwPxUiqZiw6O0MhcQuA5Fnvr5RHhB6NBYiDQog7ByGLoenGZu18eEX4wej9UfR2QXw/Ei9UhYs1AuhHKR1aHDfwHyl2FxtF1IG5Th4iB6HlAPB9NbCEQLwHiBqgYsWCZOiqNS2wBneMSABtnKig=
+   eJxjYBgF9ADt6hA6UoWBIVoFu5osZfLNPQ400w2HuZQAkPkwO0bBKBgFo2AU0A4AAJOxBZc=
   </data>
  </layer>
- <layer id="2" name="Tile Layer 2" width="22" height="12">
+ <layer id="4" name="Ceiling" width="22" height="22">
   <data encoding="base64" compression="zlib">
-   eJxjYBhewESZgcEViN2U8auzwyNvpo5gm0PZIUD1oUAcRsBcfOCLGoL9VQ1TvhFq10IWVEwIiAD1hUKxqDqm/EIizK3Fom830I17oHgvFvfCwAeg3o9Q/AnNnLlYzKUG2IvF3K1AsW1AvJ0IO5eoYBe/i0XvEXVU+gASfzGaGAw0keHvB1j0oIsdoVF44gIAfGklew==
+   eJxjYKA92KHGwLATinep4Vd7TJmB4bgyYTMjVBkYbiCZdYuAudeAZl4nwlwQ+AE06ycU/8Jj7hp1BHu1Om51MPAbaNYdKP6Lx9yzSGadJ8JcaSQ1snjUvwXKdQNxDxC/J8LcUTAKRsEoGAX0AwCFihom
   </data>
  </layer>
- <layer id="7" name="Tile Layer 3" width="22" height="12">
+ <layer id="15" name="Collision" width="22" height="22">
   <data encoding="base64" compression="zlib">
-   eJxjYKAdkFBDsL+rMDD8VoGwL6iiqoPxxZHUI7NBQBKJr4HEZgfq5Ybqf4BmLoyvjqReHc1cTSS+BZocIWCuhp0NApZYzJJBct9fFcLmJygzMCQqk+YmXlXCagqAZhaimfsai3vcgX7wgGJPPGGDT91VNHNDsZhDjpgHmrkbgP4+ChR7CvRXF1QuFaoeJJYDxGnKELF0ZUy9uEApFnfcwhJWN9DEYpWx6x1qAABfoSF7
-  </data>
- </layer>
- <objectgroup id="12" name="Object Layer 1">
-  <object id="13" gid="8274" x="448" y="192" width="64" height="64"/>
-  <object id="14" gid="8651" x="416" y="160" width="64" height="64"/>
-  <object id="15" gid="8925" x="480" y="160" width="64" height="64"/>
- </objectgroup>
- <layer id="6" name="Tile Layer 4" width="22" height="12">
-  <data encoding="base64" compression="zlib">
-   eJxjYBgF9ADt6hA6UoWBIVoFu5osZfLNPQ400w2HuZQAkPkwO0bByAMAW4QFlw==
-  </data>
- </layer>
- <layer id="4" name="Ceiling" width="22" height="12">
-  <data encoding="base64" compression="zlib">
-   eJxjYKA92KHGwLATinep4Vd7TJmB4bgyYTMjVBkYbiCZdYuAudeAZl4nwlwQ+AE06ycU/8Jj7hp1BHu1Om51MPAbaNYdKP6Lx9yzSGadJ8JcaSQ1snjUvwXKdQNxDxC/J8LcUTAKAJ2kGiY=
-  </data>
- </layer>
- <layer id="15" name="Collision" width="22" height="12" visible="0">
-  <data encoding="base64" compression="zlib">
-   eJxrNmBgaB7FJGEQIFU9Nj3oAJfZ2NSRYi4x6ojRTw7AFm7Y1JAqRig+kNXjEsNlFzXciy+MqQ1omdYBqmBxRw==
+   eJxrNmBgaB7FJGEQIFU9Nj3oAJfZ2NSRYi4x6ojRTw7AFm7Y1JAqRig+kNXjEsNlFzXciy+MqQ1ondZHwSgYBfQBACVKcUc=
   </data>
  </layer>
 </map>

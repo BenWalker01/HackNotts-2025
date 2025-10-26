@@ -14,7 +14,8 @@ class Map:
         pygame.display.set_caption("HackNotts25")
         self.current_map = "assets/tileset/baseMap.tmx"
         self.load_map(self.current_map)
-        
+        self.tile_size = TILE_SIZE  # Track current tile size
+
         # Load font for captions
         self.font = pygame.font.Font("assets/font.ttf", 24)
 
@@ -25,7 +26,7 @@ class Map:
         self.current_map = map_path
         self.tmx_data = pytmx.util_pygame.load_pygame(map_path)
         map_data = pyscroll.data.TiledMapData(self.tmx_data)
-
+        self.tile_size = self.tmx_data.tilewidth
         self.collision = [[False for _ in range(self.tmx_data.width)]
                           for _ in range(self.tmx_data.height)]
         
@@ -59,21 +60,27 @@ class Map:
 
         # Build quick lookup for named tile layers (store gids)
         self.tile_layers = {}
-        try:
-            # Try to find a layer named "market" (case-sensitive as in Tiled)
-            market_layer = self.tmx_data.get_layer_by_name("market")
-            layer_tiles = [[0 for _ in range(self.tmx_data.width)]
-                           for _ in range(self.tmx_data.height)]
-            for x, y, gid in market_layer.tiles():
-                layer_tiles[y][x] = gid
-            self.tile_layers["market"] = layer_tiles
-        except ValueError:
-            # no "market" tile layer present — that's fine
-            pass
+        # Index specific named tile layers we care about
+        for name in ("market", "tavern"):
+            try:
+                layer = self.tmx_data.get_layer_by_name(name)
+                layer_tiles = [[0 for _ in range(self.tmx_data.width)]
+                               for _ in range(self.tmx_data.height)]
+                for x, y, gid in layer.tiles():
+                    layer_tiles[y][x] = gid
+                self.tile_layers[name] = layer_tiles
+            except ValueError:
+                # layer not present — skip
+                pass
 
         map_layer = pyscroll.orthographic.BufferedRenderer(
             map_data, self.screen.get_size())
-        map_layer.zoom = 3
+        base_zoom = 3
+        if self.tile_size == 32:
+            base_zoom = 1.5  # Half zoom for double-sized tiles
+        elif self.tile_size == 16:
+            base_zoom = 3
+        map_layer.zoom = base_zoom
 
         self.group = pyscroll.PyscrollGroup(
             map_layer=map_layer, default_layer=1)
@@ -84,8 +91,8 @@ class Map:
         print("added player")
 
     def can_move_to(self, px, py):
-        tile_x = int(px / TILE_SIZE)
-        tile_y = int(py / TILE_SIZE)
+        tile_x = int(px / self.tile_size)
+        tile_y = int(py / self.tile_size)
         if 0 <= tile_x < self.tmx_data.width and 0 <= tile_y < self.tmx_data.height:
             return not self.collision[tile_y][tile_x]
         return False
@@ -122,8 +129,8 @@ class Map:
 
     def is_on_nonzero_layer(self, layer_name, px, py):
         """Return True if the tile under (px,py) on layer_name has a non-zero gid."""
-        tile_x = int(px / TILE_SIZE)
-        tile_y = int(py / TILE_SIZE)
+        tile_x = int(px / self.tile_size)
+        tile_y = int(py / self.tile_size)
         if layer_name not in self.tile_layers:
             return False
         if 0 <= tile_x < self.tmx_data.width and 0 <= tile_y < self.tmx_data.height:
