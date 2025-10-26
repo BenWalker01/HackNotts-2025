@@ -1,9 +1,13 @@
 import pygame
 from player import Player
 import random
-import math
+import glob
+import os
 
 SPEED = 10
+SCALE = 0.30
+
+HITBOX_MARGIN = 5
 
 
 class NPC(Player):
@@ -29,6 +33,34 @@ class NPC(Player):
         self.last_home_update = pygame.time.get_ticks()
         self.home_move_chance = 0.01
         self.home_move_radius = 500
+
+    def _load_sheets(self):
+        frames_folder_root = "assets/character/models/sequences"
+        walk_dirs = glob.glob(os.path.join(
+            frames_folder_root, "**", "walk"), recursive=True)
+        frames_folder_walk = random.choice(walk_dirs)
+        print(frames_folder_walk)
+        frame_files = sorted(f for f in os.listdir(frames_folder_walk))
+        frames_per_direction = {
+            "l": [],
+            "r": [],
+            "u": [],
+            "d": []
+        }
+        order = ["u", "l", "d", "r"]
+        for filename in frame_files:
+            img = pygame.image.load(os.path.join(
+                frames_folder_walk, filename)).convert_alpha()
+            width = img.get_width()
+            height = img.get_height() // 4
+
+            for i in range(4):
+                frame = img.subsurface(pygame.Rect(
+                    0, i * height, width, height))
+                frame = pygame.transform.scale(
+                    frame, (int(width * SCALE), int(height * SCALE)))
+                frames_per_direction[order[i]].append(frame)
+        return frames_per_direction
 
     def _maybe_move_home(self):
         now = pygame.time.get_ticks()
