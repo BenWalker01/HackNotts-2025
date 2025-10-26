@@ -2,12 +2,14 @@ import pygame
 import sys
 from map import Map
 from player import Player
+from npc import NPC
 
 
 class Game:
-    def __init__(self, player, map):
+    def __init__(self, player, map, npcs):
         self.player: Player = player
         self.map: Map = map
+        self.npcs: list[NPC] = npcs
 
     def run(self):
         clock = pygame.time.Clock()
@@ -31,6 +33,9 @@ class Game:
                 self.player.move_up()
             if keys[pygame.K_s]:
                 self.player.move_down()
+
+            for npc in self.npcs:
+                npc.update()
 
             self.map.group.update()
             self.map.group.center(self.player.rect.center)
