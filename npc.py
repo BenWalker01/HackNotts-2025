@@ -77,7 +77,7 @@ class NPC(Player):
 
     def _get_random_valid_position(self):
         attempts = 0
-        max_attempts = 1000  # avoid infinite loops
+        max_attempts = 10000  # avoid infinite loops
 
         while attempts < max_attempts:
             x = random.randint(0, self.window.screen.get_width() - 1)
@@ -86,7 +86,7 @@ class NPC(Player):
                 return x, y
             attempts += 1
 
-        return (100, 100)
+        return (600, 350)
 
     def choose_target(self, max_distance=50):
         candidates = []
