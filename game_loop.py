@@ -4,7 +4,7 @@ from map import Map
 from player import Player
 
 
-class Game:
+class GameLoop:
     def __init__(self, player, map):
         self.player: Player = player
         self.map: Map = map
