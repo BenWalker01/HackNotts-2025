@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="21" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="1">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="21" height="11" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="1">
  <tileset firstgid="1" source="medieval tileset interior.tsx"/>
+ <tileset firstgid="401" source="Tile-set - Toen's Medieval Strategy (16x16) - v.1.0.tsx"/>
  <layer id="1" name="base" width="21" height="11">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -63,4 +64,19 @@
 </data>
   </layer>
  </group>
+ <layer id="6" name="Collision" width="21" height="11" visible="0">
+  <data encoding="csv">
+608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,
+608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,608,
+608,608,0,0,0,0,0,0,0,0,0,0,0,0,608,608,608,0,608,608,608,
+608,608,0,0,0,0,0,0,0,0,608,608,608,608,608,608,608,0,0,0,608,
+608,608,0,608,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,608,
+608,608,0,608,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,608,
+608,608,0,0,0,0,0,0,0,0,0,0,0,0,0,608,608,608,0,0,608,
+608,608,0,0,0,0,0,0,0,0,0,0,0,0,0,608,608,608,0,0,608,
+608,608,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,608,
+608,608,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,608,
+608,608,608,608,608,608,608,608,608,608,0,608,608,608,608,608,608,608,608,608,608
+</data>
+ </layer>
 </map>
