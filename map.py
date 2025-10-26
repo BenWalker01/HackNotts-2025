@@ -8,18 +8,18 @@ TILE_SIZE = 16
 
 
 class Map:
-    def __init__(self):
+    def __init__(self, path):
         self.screen = pygame.display.set_mode(
             (1024, 768), HWSURFACE | DOUBLEBUF)
         pygame.display.set_caption("HackNotts25")
+        self.path = path
         self.load_map()
 
     def update_screen(self):
         self.group.draw(self.screen)
 
     def load_map(self):
-        self.tmx_data = pytmx.util_pygame.load_pygame(
-            "assets/tileset/baseMap.tmx")
+        self.tmx_data = pytmx.util_pygame.load_pygame(self.path)
         map_data = pyscroll.data.TiledMapData(self.tmx_data)
 
         self.collision = [[False for _ in range(self.tmx_data.width)]

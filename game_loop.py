@@ -6,9 +6,9 @@ from npc import NPC
 
 
 class GameLoop:
-    def __init__(self, player, map, npcs):
+    def __init__(self, player, maps, npcs):
         self.player: Player = player
-        self.map: Map = map
+        self.maps: dict[Map] = maps
         self.npcs: list[NPC] = npcs
 
     def load_map(self, map_name):
