@@ -107,7 +107,7 @@ def draw_textbox_(screen, ui_assets, text: str):
 
     # Load a readable font
     font_path = os.path.join('assets', 'font.ttf')
-    font = pygame.font.Font(font_path, 22)
+    font = pygame.font.Font(font_path, 40)
 
     # Header (optional)
     header = "Common-Folk Talk"

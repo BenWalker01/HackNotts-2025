@@ -1,4 +1,5 @@
 import pygame
+from game_state import GameState
 from map import Map
 from player import Player
 from npc import NPC
@@ -22,8 +23,10 @@ def main():
     for npc in npcs:
         maps[npc.map_name].add_npc(npc)
 
+    state = GameState()
+
     # Start the main game loop
-    game = GameLoop(player, maps, npcs)
+    game = GameLoop(player, maps, npcs, state)
     game.run()
 
 

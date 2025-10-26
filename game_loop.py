@@ -1,82 +1,63 @@
-import pygame
-import sys
+import pygame, sys
 from map import Map
 from player import Player
 from npc import NPC
 from ui_manager import UIAssets, draw_textbox_
 
+INTERACT_RADIUS = 12
 
 class GameLoop:
-    def __init__(self, player, maps, npcs, state):
+    def __init__(self, player, maps: dict[str, Map], npcs, state):
         self.player: Player = player
-        self.maps: dict[str, Map] = maps
+        self.maps = maps
+        self.current_map = "main"   
+        self.map: Map = self.maps[self.current_map]
+
         self.npcs: list[NPC] = npcs
         self.state = state
         self.ui = UIAssets()
 
-        self.current_map = "main"
-        self.map = self.maps[self.current_map]
+        try:
+            self.map.add_player(self.player)
+        except Exception:
+            pass
 
-        # Store player positions per map
-        self.player_positions = {name: (100, 100) for name in maps}
-
-        # Setup map & player
-        self.player.set_map(self.map)
-        self.map.add_player(self.player)
-
-        # Assign NPCs to their maps (once)
-        for npc in self.npcs:
-            npc_map = npc.map_name if hasattr(npc, "map_name") else "main"
-            if npc_map in self.maps:
-                npc.set_map(self.maps[npc_map])
-                self.maps[npc_map].group.add(npc)
-
-    def load_map(self, target_map_name):
-        """Switch to a new map, remembering positions."""
-        if target_map_name not in self.maps:
-            print(f"Error: Map '{target_map_name}' not loaded.")
+    def load_map(self, name: str):
+        """Switch to another map (e.g., tavern/market) and re-center camera."""
+        if name not in self.maps:
             return
+        self.current_map = name
+        self.map = self.maps[name]
+        self.map.group.center(self.player.rect.center)
+        self.map.update_screen()
+        try:
+            self.map.add_player(self.player)
+        except Exception:
+            pass
 
-        # Save position before switching
-        self.player_positions[self.current_map] = (
-            self.player.x, self.player.y)
-
-        print(f"Switching to map: {target_map_name}")
-        self.current_map = target_map_name
-        self.map = self.maps[self.current_map]
-
-        # Restore previous position on new map
-        spawn_x, spawn_y = self.player_positions.get(
-            target_map_name, (100, 100))
-        self.player.x, self.player.y = spawn_x, spawn_y
-        self.player.rect.topleft = (spawn_x, spawn_y)
-
-        # Update player’s map reference
-        self.player.set_map(self.map)
-        self.map.add_player(self.player)
+    def _nearest_npc_in_range(self, radius=INTERACT_RADIUS):
+        px, py = self.player.rect.center
+        best = None
+        best_d2 = radius * radius
+        for npc in self.npcs:
+            if hasattr(npc, "map_name") and npc.map_name != self.current_map:
+                continue
+            nx, ny = npc.rect.center
+            d2 = (nx - px) * (nx - px) + (ny - py) * (ny - py)
+            if d2 <= best_d2:
+                best, best_d2 = npc, d2
+        return best
 
     def run(self):
         clock = pygame.time.Clock()
         running = True
-
         while running:
-            self.player.check_near_building(self.map)
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-                # NEW: handle E press to talk to nearest NPC
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                    npc = self._nearest_npc_in_range()
-                    if npc is not None:
-                        text = self.state.get_one_rumor_text()
-                        screen = pygame.display.get_surface()
-                        draw_textbox_(screen, self.ui, text)
-                        print("[Rumor]", text)
+                    pygame.quit(); sys.exit()
 
                 if event.type == pygame.KEYDOWN:
+                    # Talk to NPC / toggle textbox
                     if event.key == pygame.K_e:
                         if self.state.dialog_visible:
                             self.state.close_dialog()
@@ -85,44 +66,42 @@ class GameLoop:
                             if npc is not None:
                                 self.state.open_rumor_dialog()
 
-                    # optional quick close keys:
-                    if event.key in (pygame.K_ESCAPE, pygame.K_SPACE):
-                        self.state.close_dialog()
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    print(pygame.mouse.get_pos())
-                if event.type == pygame.KEYDOWN:
+                    # Enter/leave buildings (Enter)
                     if event.key == pygame.K_RETURN:
-                        # Enter building
-                        if self.current_map == "main" and self.player.near_building:
-                            self.load_map(
-                                self.player.near_building["target_map"])
-                        # Leave building
+                        # if your Player exposes near_building with {"target_map": ...}
+                        if self.current_map == "main" and getattr(self.player, "near_building", None):
+                            target = self.player.near_building.get("target_map")
+                            if target: self.load_map(target)
                         elif self.current_map != "main":
                             self.load_map("main")
 
-            # Player movement
+                    # quick close for dialog
+                    if event.key in (pygame.K_ESCAPE, pygame.K_SPACE):
+                        self.state.close_dialog()
+
             keys = pygame.key.get_pressed()
             self.player.walking = False
 
+            # freeze movement while dialog open
             if not self.state.dialog_visible:
                 if keys[pygame.K_a]: self.player.move_left()
                 if keys[pygame.K_d]: self.player.move_right()
                 if keys[pygame.K_w]: self.player.move_up()
                 if keys[pygame.K_s]: self.player.move_down()
 
-            # Update only NPCs on the current map
+            # update only NPCs on the current map
             for npc in self.npcs:
-                if npc.map == self.map:
+                if not hasattr(npc, "map_name") or npc.map_name == self.current_map:
                     npc.update()
 
-            # Update and draw
+            # draw world
             self.map.group.update()
             self.map.group.center(self.player.rect.center)
             self.map.update_screen()
 
-            screen = pygame.display.get_surface()
+            # draw dialog on top
             if self.state.dialog_visible:
+                screen = pygame.display.get_surface()
                 draw_textbox_(screen, self.ui, self.state.dialog_text)
 
             pygame.display.flip()
