@@ -1,5 +1,11 @@
 # HackNotts-2025
 
+## To run
+
+`$ pip install -r requirements.txt`
+
+`$ python3 main.py`
+
 ## Assets
 
 Player models from - https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
