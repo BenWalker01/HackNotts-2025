@@ -7,7 +7,7 @@ class GameState:
         api.init()
         
         # Game modes
-        self.current_mode = "GAMEPLAY"  # GAMEPLAY, TRADING, INVENTORY, STORAGE, UPGRADES
+        self.current_mode = "Menu"  # GAMEPLAY, TRADING, INVENTORY, STORAGE, UPGRADES
         
         # Location tracking
         self.current_location = None  # "market", "tavern", "home", etc.
@@ -46,13 +46,7 @@ class GameState:
         elif location == "tavern":
             self.check_for_deals()
     
-    def detect_location(self, player):
-        """Check if player is near interactive objects."""
-        # TODO: Add collision detection for buildings/NPCs
-        # For now, hardcode positions
-        if 100 < player.x < 200 and 100 < player.y < 200:
-            return "market"
-        return None
+
     
     def open_trading_ui(self, vendor):
         self.current_mode = "TRADING"
@@ -82,10 +76,3 @@ class GameState:
         # Day
         day_text = font.render(f"Day: {game_status['current_day']}/{game_status['max_days']}", True, (255, 255, 255))
         screen.blit(day_text, (200, 10))
-    
-    def draw_trading_ui(self, screen):
-        """Draw trading interface."""
-        # TODO: Implement with UI panels
-        font = pygame.font.Font(None, 32)
-        text = font.render(f"Trading with {self.trading_vendor}", True, (255, 255, 255))
-        screen.blit(text, (400, 300))
