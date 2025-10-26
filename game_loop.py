@@ -6,7 +6,7 @@ from npc import NPC
 
 
 class GameLoop:
-    def __init__(self, player, map):
+    def __init__(self, player, map, npcs):
         self.player: Player = player
         self.map: Map = map
         self.npcs: list[NPC] = npcs
