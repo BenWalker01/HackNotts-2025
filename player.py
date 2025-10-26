@@ -1,11 +1,19 @@
 import pygame
 import os
 from map import Map
+import math
 
 SCALE = 0.30
 SPEED = 3 * SCALE
 
 HITBOX_MARGIN = 5
+
+
+BUILDINGS = {
+    "MARKET": (415, 26),
+    "TAVERN": (287, 120),
+    "HOUSE": (135, 82)
+}
 
 
 class Player(pygame.sprite.Sprite):
@@ -25,6 +33,8 @@ class Player(pygame.sprite.Sprite):
 
         self.width = self.image.get_width()
         self.height = self.image.get_height()
+
+        self.near_building = None
 
     def _load_sheets(self):
         frames_folder_root = "assets/character/models/sequences/leather_armor"
@@ -101,3 +111,12 @@ class Player(pygame.sprite.Sprite):
             self.x = new_x
         self.walking = True
         self.rect.topleft = (self.x, self.y)
+
+    def check_near_building(self):
+        for building, coord in BUILDINGS.items():
+            b_x, b_y = coord
+            p_x, p_y = self.x + self.width // 2, self.y - self.height // 2
+            dist = ((p_x - b_x) ** 2 + (p_y - b_y) ** 2)**0.5
+            if dist <= 25:
+                self.near_building = building
+        self.near_building = None

@@ -11,10 +11,14 @@ class GameLoop:
         self.map: Map = map
         self.npcs: list[NPC] = npcs
 
+    def load_map(self, map_name):
+        ...
+
     def run(self):
         clock = pygame.time.Clock()
         running = True
         while running:
+            self.player.check_near_building()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -22,6 +26,11 @@ class GameLoop:
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     print(pygame.mouse.get_pos())
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        if self.player.near_building:
+                            self.load_map(self.player.near_building)
 
             keys = pygame.key.get_pressed()
             self.player.walking = False
