@@ -1,26 +1,29 @@
 import pygame
-from player import Player
 import random
 import glob
 import os
+from player import Player
+
 
 SPEED = 10
 SCALE = 0.30
-
 HITBOX_MARGIN = 5
 
 
 class NPC(Player):
-    def __init__(self, window):
+    def __init__(self, window, map_name="main"):
         super().__init__(window)
 
-        self.window = window
+        self.map = window           # the Map object this NPC belongs to
+        self.map_name = map_name    # string name of that map
+
         self.x, self.y = self._get_random_valid_position()
         self.home = (self.x, self.y)
         self.rect.topleft = (self.x, self.y)
 
-        print(f"NPC: {self.x}, {self.y}")
+        print(f"[NPC:{self.map_name}] Spawned at {self.x}, {self.y}")
 
+        # Animation & facing
         self.direction = random.choice(["d", "l", "r"])
         self.image = self.frames_walk[self.direction][0]
 
@@ -30,24 +33,27 @@ class NPC(Player):
         self.last_move_time = pygame.time.get_ticks()
         self.pause_duration = 1000  # ms
 
+        # Home movement logic
         self.last_home_update = pygame.time.get_ticks()
         self.home_move_chance = 0.01
         self.home_move_radius = 500
+
+    def set_map(self, new_map, map_name=None):
+        """Allows reassigning this NPC to another map if needed."""
+        self.map = new_map
+        if map_name:
+            self.map_name = map_name
 
     def _load_sheets(self):
         frames_folder_root = "assets/character/models/sequences"
         walk_dirs = glob.glob(os.path.join(
             frames_folder_root, "**", "walk"), recursive=True)
         frames_folder_walk = random.choice(walk_dirs)
-        print(frames_folder_walk)
         frame_files = sorted(f for f in os.listdir(frames_folder_walk))
-        frames_per_direction = {
-            "l": [],
-            "r": [],
-            "u": [],
-            "d": []
-        }
+
+        frames_per_direction = {"l": [], "r": [], "u": [], "d": []}
         order = ["u", "l", "d", "r"]
+
         for filename in frame_files:
             img = pygame.image.load(os.path.join(
                 frames_folder_walk, filename)).convert_alpha()
@@ -58,7 +64,8 @@ class NPC(Player):
                 frame = img.subsurface(pygame.Rect(
                     0, i * height, width, height))
                 frame = pygame.transform.scale(
-                    frame, (int(width * SCALE), int(height * SCALE)))
+                    frame, (int(width * SCALE), int(height * SCALE))
+                )
                 frames_per_direction[order[i]].append(frame)
         return frames_per_direction
 
@@ -70,30 +77,29 @@ class NPC(Player):
 
         self.last_home_update = now
         if random.random() < self.home_move_chance:
-            print("NEW HOME")
             self.home = self.choose_target(max_distance=self.home_move_radius)
 
-        self.last_home_update
-
     def _get_random_valid_position(self):
+        """Find a random walkable tile within this map."""
         attempts = 0
-        max_attempts = 10000  # avoid infinite loops
+        max_attempts = 10000
 
         while attempts < max_attempts:
-            x = random.randint(0, self.window.screen.get_width() - 1)
-            y = random.randint(0, self.window.screen.get_height() - 1)
-            if self.window.can_move_to(x, y):
+            x = random.randint(0, self.map.screen.get_width() - 1)
+            y = random.randint(0, self.map.screen.get_height() - 1)
+            if self.map.can_move_to(x, y):
                 return x, y
             attempts += 1
 
         return (600, 350)
 
     def choose_target(self, max_distance=50):
+        """Pick a random walkable target near the NPC's home."""
         candidates = []
         for dx in range(-max_distance, max_distance + 1):
             for dy in range(-max_distance, max_distance + 1):
                 x, y = self.home[0] + dx, self.home[1] + dy
-                if self.window.can_move_to(x, y):
+                if self.map.can_move_to(x, y):
                     distance = ((x - self.home[0]) **
                                 2 + (y - self.home[1]) ** 2) ** 0.5
                     weight = max_distance - distance
@@ -118,27 +124,22 @@ class NPC(Player):
         dist = math.hypot(dx, dy)
 
         if dist < 1:
-            # Close enough — reached target
             self.x, self.y = target_x, target_y
             return True
 
-        # Normalize direction
         dx /= dist
         dy /= dist
-
-        # Movement speed (pixels per second)
-        speed = 15  # tweak for desired smoothness
-        step = speed * (dt / 1000.0)  # convert ms -> seconds
+        speed = 15
+        step = speed * (dt / 1000.0)
 
         new_x = self.x + dx * step
         new_y = self.y + dy * step
 
-        # Check collisions / blocked tiles
-        if self.window.can_move_to(new_x, new_y):
+        if self.map.can_move_to(new_x, new_y):
             self.x = new_x
             self.y = new_y
 
-            # Update facing direction
+            # Direction
             if abs(dx) > abs(dy):
                 self.direction = "r" if dx > 0 else "l"
             else:
@@ -146,11 +147,10 @@ class NPC(Player):
 
             self.walking = True
         else:
-            # Blocked: stop and choose a new target next time
             self.walking = False
             return True
 
-        return False  # not reached yet
+        return False
 
     def update(self):
         now = pygame.time.get_ticks()
@@ -162,7 +162,7 @@ class NPC(Player):
             if self.cooldown > 0:
                 return
             else:
-                self.cooldown = 0  # finished pausing
+                self.cooldown = 0
 
         self._maybe_move_home()
 
