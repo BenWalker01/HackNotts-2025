@@ -90,7 +90,7 @@
 </data>
   </layer>
  </group>
- <layer id="10" name="Collision" width="11" height="8">
+ <layer id="10" name="Collision" width="11" height="8" visible="0" opacity="0">
   <data encoding="csv">
 608,608,608,608,608,608,608,608,608,608,608,
 608,608,608,608,608,608,608,608,608,608,608,
