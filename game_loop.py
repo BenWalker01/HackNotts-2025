@@ -4,12 +4,29 @@ from map import Map
 from player import Player
 from npc import NPC
 
+INTERACT_RADIUS = 12
+
 
 class GameLoop:
-    def __init__(self, player, maps, npcs):
+    def __init__(self, player, maps, npcs, state):
         self.player: Player = player
         self.maps: dict[str, Map] = maps
         self.npcs: list[NPC] = npcs
+        self.state = state
+
+    def _nearest_npc_in_range(self, radius=INTERACT_RADIUS):
+        px, py = self.player.rect.center
+        best = None
+        best_d2 = radius * radius
+        for npc in self.npcs:
+            nx, ny = npc.rect.center
+            dx = nx - px
+            dy = ny - py
+            d2 = dx*dx + dy*dy
+            if d2 <= best_d2:
+                best = npc
+                best_d2 = d2
+        return best
 
         self.current_map = "main"
         self.map = self.maps[self.current_map]
