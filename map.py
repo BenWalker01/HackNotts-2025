@@ -13,9 +13,9 @@ class Map:
             (1024, 768), HWSURFACE | DOUBLEBUF | RESIZABLE)
         pygame.display.set_caption("HackNotts25")
         self.current_map = "assets/tileset/baseMap.tmx"
-        self.load_map(self.current_map)
         self.tile_size = TILE_SIZE  # Track current tile size
-
+        self.load_map(self.current_map)
+        
         # Load font for captions
         self.font = pygame.font.Font("assets/font.ttf", 24)
 
@@ -26,7 +26,10 @@ class Map:
         self.current_map = map_path
         self.tmx_data = pytmx.util_pygame.load_pygame(map_path)
         map_data = pyscroll.data.TiledMapData(self.tmx_data)
+
+        # Update tile size based on the loaded map
         self.tile_size = self.tmx_data.tilewidth
+
         self.collision = [[False for _ in range(self.tmx_data.width)]
                           for _ in range(self.tmx_data.height)]
         
@@ -73,14 +76,16 @@ class Map:
                 # layer not present — skip
                 pass
 
+        # Create the map layer with explicit layer rendering order
         map_layer = pyscroll.orthographic.BufferedRenderer(
             map_data, self.screen.get_size())
-        base_zoom = 3
-        if self.tile_size == 32:
-            base_zoom = 1.5  # Half zoom for double-sized tiles
-        elif self.tile_size == 16:
-            base_zoom = 3
-        map_layer.zoom = base_zoom
+        
+        # Adjust zoom based on tile size to maintain consistent scale
+        # 16px tiles = zoom 3, 32px tiles = zoom 1.5
+        map_layer.zoom = 3 * (16 / self.tile_size)
+
+        # Force redraw to ensure all layers are rendered
+        map_layer.redraw_tiles(map_layer._buffer)
 
         self.group = pyscroll.PyscrollGroup(
             map_layer=map_layer, default_layer=1)
