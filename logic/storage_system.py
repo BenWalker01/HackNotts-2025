@@ -6,8 +6,17 @@ Handles inventory capacity, home storage, and theft mechanics.
 import random
 
 class StorageManager:
-    def __init__(self, seed=None):
-        self.rng = random.Random(seed)
+    def __init__(self, seed=None, tune=None):
+        self.rng = random.Random(seed if seed is not None else 44)
+
+        if tune:
+            self.theft_threshold = tune.theft_threshold
+            self.theft_chance = tune.theft_chance
+            self.guard_cost = tune.guard_cost
+        else:
+            self.theft_threshold = 80
+            self.theft_chance = 0.04
+            self.guard_cost = 2
         
         # Home storage
         self.home_capacity = 12
@@ -21,8 +30,6 @@ class StorageManager:
         
         # Theft protection
         self.guard_service_active = False
-        self.theft_chance = 0.05  # 5% base chance
-        self.theft_threshold = 70  # Gold value threshold
         
     def get_total_home_capacity(self):
         """Calculate current home storage capacity including upgrades."""

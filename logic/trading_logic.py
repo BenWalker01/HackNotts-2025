@@ -5,7 +5,7 @@ import random
 from .economy_bootstrap import ITEMS, VENDORS
 
 class Market:
-    def __init__(self, seed: int | None = 44):
+    def __init__(self, seed: int | None = 44, tune = None):
         self.items = ITEMS
         self.vendors = {
             name: {
@@ -22,14 +22,21 @@ class Market:
         self.margin_buy  = 0.10  # vendor buys cheaper
 
         self.rng = random.Random(seed if seed is not None else 44)
+        self.tune = tune
+        if self.tune:
+            self.player_gold = self.tune.starting_gold
+            self.player_capacity = self.tune.capacity
+            self.restock_frac = self.tune.restock_frac
+        else:
+            self.player_gold = 60
+            self.player_capacity = 20.0
+            self.restock_frac = 0.25
         events_path = os.path.join(os.path.dirname(__file__), "events_seeds.json")
         self._events = self._load_events(events_path)
         rumors_path = os.path.join(os.path.dirname(__file__), "rumors_seeds.json")
         self._rumors = self._load_json(rumors_path)
         self._today_event = None
         self._rumors_today = [] 
-
-        self.player_capacity = 20
 
         self._forced_event_lock = False
 
@@ -47,6 +54,9 @@ class Market:
         m = VENDORS[vendor].get("margins", {})
         sell = m.get("sell", self.margin_sell)
         buy  = m.get("buy",  self.margin_buy)
+        if self.tune:
+            sell += self.tune.margin_sell_add
+            buy  += self.tune.margin_buy_add
         return sell, buy
     
     def _item_weight(self, item: str) -> float:
@@ -104,6 +114,21 @@ class Market:
         _, m_buy = self._vendor_margins(vendor)
         factor = self._event_multiplier(item)
         return int(math.floor(base * factor * (1 - m_buy) * qty))
+    
+    def _event_multiplier(self, item_key: str) -> float:
+        if not self._today_event:
+            base = 1.0
+        else:
+            it = self.items[item_key]
+            cats = self._today_event.get("cat_multipliers", {})
+            items = self._today_event.get("item_multipliers", {})
+            base = float(cats.get(it["category"], 1.0)) * float(items.get(item_key, 1.0))
+        # scale event impact toward/away from 1 by difficulty
+        if self.tune:
+            scale = self.tune.event_scale
+            # move factor toward 1.0 when scale<1, away when >1
+            return 1.0 + (base - 1.0) * scale
+        return base
 
     # ---------- transactions ----------
     def buy(self, vendor, item, qty) -> int:
@@ -151,10 +176,11 @@ class Market:
         for v_name, v in self.vendors.items():
             targets = VENDORS[v_name]["target_stock"]
             stock = v["stock"]
+            frac = self.restock_frac if hasattr(self, "restock_frac") else 0.25
             for k, tgt in targets.items():
                 have = stock.get(k, 0)
                 if have < tgt:
-                    step = max(1, int(0.25 * tgt)) # up to ~25% of target
+                    step = max(1, int(frac * tgt)) # up to ~25% of target
                     stock[k] = min(tgt, have + self.rng.randint(0, step))
         
         if not self._forced_event_lock:
@@ -179,8 +205,9 @@ class Market:
         out = []
         if not self._rumors:
             return out
-        pool = self._rumors[:]              # copy
+        pool = self._rumors[:]
         self.rng.shuffle(pool)
+        truth_shift = self.tune.rumor_truth_shift if self.tune else 0.0
 
         # 50% chance: inject one rumor that matches today's event (if any exist)
         if self._today_event and self.rng.random() < 0.5:
@@ -189,27 +216,22 @@ class Market:
             if matching:
                 r = self.rng.choice(matching)
                 pool.remove(r)
+                p = max(0.0, min(1.0, float(r.get("truth_prob", 0.5)) + truth_shift))
                 out.append({
                     "text": r["text"],
-                    "is_true": self.rng.random() < float(r.get("truth_prob", 0.5)),
+                    "is_true": self.rng.random() < p,
                     "matches_event": True
                 })
 
         remain = max(0, n - len(out))
         for r in pool[:remain]:
-            is_true = self.rng.random() < float(r.get("truth_prob", 0.5))
-            matches_event = bool(self._today_event and r.get("event_key_hint") == self._today_event.get("key"))
-            out.append({"text": r["text"], "is_true": is_true, "matches_event": matches_event})
+            p = max(0.0, min(1.0, float(r.get("truth_prob", 0.5)) + truth_shift))
+            out.append({
+                "text": r["text"],
+                "is_true": self.rng.random() < p,
+                "matches_event": bool(self._today_event and r.get("event_key_hint") == self._today_event.get("key"))
+            })
         return out
-
-    
-    def _event_multiplier(self, item_key: str) -> float:
-        if not self._today_event:
-            return 1.0
-        it = self.items[item_key]
-        cats = self._today_event.get("cat_multipliers", {})
-        items = self._today_event.get("item_multipliers", {})
-        return float(cats.get(it["category"], 1.0)) * float(items.get(item_key, 1.0))
     
     def _load_events(self, path: str):
         if os.path.exists(path):

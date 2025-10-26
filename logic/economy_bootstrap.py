@@ -1,6 +1,4 @@
 
-#LATER ON WE WANT TO RANDOMIZE IT (INITIALLY AT THE BEGINNING OF A GAME) 
-
 ITEMS = {
     # Light, cheap staples; goes bad in a few days
     "wheat":   {"category": "agricultural", "base_price": 2,  "weight": 0.5, "perishable_days": 4},

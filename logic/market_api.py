@@ -3,21 +3,52 @@ from .storage_system import StorageManager
 from .npc_deals import NPCDealManager
 from .progression import ProgressionTracker
 from .upgrades import UpgradeShop
+from .difficulty import DIFFICULTIES
 
 _market = None
 _storage = None
 _npc_deals = None
 _progression = None
 _upgrades = None
+_world = None
+_curr_diff_key = "merchant"
 
-def init(seed: int | None = 44):
-    global _market, _storage, _npc_deals, _progression, _upgrades
-    if _market is None:
-        _market = Market(seed)
-        _storage = StorageManager(seed)
-        _npc_deals = NPCDealManager(seed)
-        _progression = ProgressionTracker()
-        _upgrades = UpgradeShop()
+def init(seed: int | None = 44, difficulty: str = "merchant"):
+    global _market, _storage, _npc_deals, _progression, _upgrades, _world, _curr_diff_key
+    if difficulty not in DIFFICULTIES:
+        raise ValueError(f"Unknown difficulty '{difficulty}'")
+    _curr_diff_key = difficulty
+    if _world is None:
+        tune = DIFFICULTIES[difficulty]
+        _world = _GameWorld(seed=seed, tune=tune)
+        # point API globals at the tuned world
+        _market = _world.market
+        _storage = _world.storage
+        _npc_deals = _world.deals
+        _progression = _world.progress
+        _upgrades = _world.upgrades
+
+class _GameWorld:
+    def __init__(self, seed=None, tune=None):
+        from .trading_logic import Market
+        from .storage_system import StorageManager
+        from .progression import ProgressionTracker
+        from .upgrades import UpgradeShop
+        from .npc_deals import NPCDealManager
+
+        self.market = Market(seed=seed, tune=tune)
+        self.storage = StorageManager(seed=seed, tune=tune)
+        self.progress = ProgressionTracker()
+        self.upgrades = UpgradeShop()
+        self.deals = NPCDealManager(seed=seed, tune=tune)
+
+def reset_world():
+    """Wipe everything so the next init() creates a brand-new tuned world."""
+    global _world, _market, _storage, _npc_deals, _progression, _upgrades
+    _world = _market = _storage = _npc_deals = _progression = _upgrades = None
+
+def get_difficulty():
+    return _curr_diff_key
 
 
 def get_vendors():
@@ -120,7 +151,7 @@ def retrieve_item(item: str, qty: int):
 
 def hire_guard():
     """Hire guard service for 2 gold."""
-    cost = _storage.hire_guard(_market.player_gold)
+    cost = _storage.hire_guard(_market.player_gold, cost=_storage.guard_cost)
     _market.player_gold -= cost
     return cost
 

@@ -6,8 +6,9 @@ Generates random offers with good deals and potential scams.
 import random
 
 class NPCDealManager:
-    def __init__(self, seed=None):
+    def __init__(self, seed=None, tune=None):
         self.rng = random.Random(seed)
+        self.tune = tune
         
         # Current active deal
         self.active_deal = None
