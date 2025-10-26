@@ -12,6 +12,12 @@ class GameLoop:
         self.maps = maps
         self.current_map = "main"   
         self.map: Map = self.maps[self.current_map]
+        self.player_positions = {name: None for name in self.maps}
+        self.player_positions[self.current_map] = getattr(self.player, "rect", None).topleft
+        try:
+            self.map.add_player(self.player)
+        except Exception:
+            pass
 
         self.npcs: list[NPC] = npcs
         self.state = state
@@ -25,15 +31,41 @@ class GameLoop:
     def load_map(self, name: str):
         """Switch to another map (e.g., tavern/market) and re-center camera."""
         if name not in self.maps:
+            print(f"[Map] Unknown map '{name}'"); 
             return
+
+        # save current position for return trips
+        if getattr(self.player, "rect", None):
+            self.player_positions[self.current_map] = self.player.rect.topleft
+
+        # swap active map
         self.current_map = name
         self.map = self.maps[name]
-        self.map.group.center(self.player.rect.center)
-        self.map.update_screen()
+
+        # restore previous position or use map spawn or default
+        spawn = (
+            self.player_positions.get(name)
+            or getattr(self.map, "spawn_pos", None)
+            or (100, 100)
+        )
+        if getattr(self.player, "rect", None):
+            self.player.rect.topleft = spawn
+            # keep x/y in sync if your Player uses both
+            if hasattr(self.player, "x"): self.player.x = spawn[0]
+            if hasattr(self.player, "y"): self.player.y = spawn[1]
+
+        # update player→map links
+        if hasattr(self.player, "set_map"): 
+            self.player.set_map(self.map)
         try:
             self.map.add_player(self.player)
         except Exception:
             pass
+
+        # center camera and redraw
+        self.map.group.center(self.player.rect.center)
+        self.map.update_screen()
+
 
     def _nearest_npc_in_range(self, radius=INTERACT_RADIUS):
         px, py = self.player.rect.center
@@ -66,12 +98,11 @@ class GameLoop:
                             if npc is not None:
                                 self.state.open_rumor_dialog()
 
-                    # Enter/leave buildings (Enter)
-                    if event.key == pygame.K_RETURN:
-                        # if your Player exposes near_building with {"target_map": ...}
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         if self.current_map == "main" and getattr(self.player, "near_building", None):
                             target = self.player.near_building.get("target_map")
-                            if target: self.load_map(target)
+                            if target: 
+                                self.load_map(target)
                         elif self.current_map != "main":
                             self.load_map("main")
 
