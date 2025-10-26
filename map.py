@@ -1,5 +1,5 @@
 import pygame
-from pygame.constants import HWSURFACE, DOUBLEBUF, RESIZABLE
+from pygame.constants import HWSURFACE, DOUBLEBUF
 from pygame.surface import Surface
 import pyscroll
 import pytmx
@@ -10,7 +10,7 @@ TILE_SIZE = 16
 class Map:
     def __init__(self):
         self.screen = pygame.display.set_mode(
-            (1024, 768), HWSURFACE | DOUBLEBUF | RESIZABLE)
+            (1024, 768), HWSURFACE | DOUBLEBUF)
         pygame.display.set_caption("HackNotts25")
         self.load_map()
 
