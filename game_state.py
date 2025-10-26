@@ -1,6 +1,7 @@
 # game_state.py
 import pygame
 from logic import market_api as api
+import logic.market_api as api
 
 class GameState:
     def __init__(self):
@@ -39,6 +40,10 @@ class GameState:
     
     def open_rumor_dialog(self):
         self.dialog_text = self.get_one_rumor_text()
+        self.dialog_visible = True
+    
+    def set_dialog(self, dialog: str):
+        self.dialog_text = dialog
         self.dialog_visible = True
 
     def close_dialog(self):

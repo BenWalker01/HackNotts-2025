@@ -3,6 +3,8 @@ from map import Map
 from player import Player
 from npc import NPC
 from ui_manager import UIAssets, draw_textbox_
+import logic.market_api as api
+import logic.economy_bootstrap as eb
 
 INTERACT_RADIUS = 12
 
@@ -10,7 +12,7 @@ class GameLoop:
     def __init__(self, player, maps: dict[str, Map], npcs, state):
         self.player: Player = player
         self.maps = maps
-        self.current_map = "main"   
+        self.current_map = "market"   
         self.map: Map = self.maps[self.current_map]
         self.player_positions = {name: None for name in self.maps}
         self.player_positions[self.current_map] = getattr(self.player, "rect", None).topleft
@@ -79,6 +81,27 @@ class GameLoop:
             if d2 <= best_d2:
                 best, best_d2 = npc, d2
         return best
+    
+    def _nearest_coord_in_range(self, radius=INTERACT_RADIUS):
+        px, py = self.player.rect.center
+        best = None
+        best_d2 = radius * radius
+        for npc in self.npcs:
+            if hasattr(npc, "map_name") and npc.map_name != self.current_map:
+                continue
+            nx, ny = 217, 173
+            d2 = (nx - px) * (nx - px) + (ny - py) * (ny - py)
+            if d2 <= best_d2:
+                best, best_d2 = npc, d2
+        return best
+
+    def is_near_point(self, point_xy, radius=INTERACT_RADIUS) -> bool:
+        """Return True if the player is within radius of point_xy (x,y) in world pixels."""
+        px, py = self.player.rect.center
+        x, y = point_xy
+        dx, dy = x - px, y - py
+        return (dx*dx + dy*dy) <= (radius * radius)
+
 
     def run(self):
         clock = pygame.time.Clock()
@@ -94,9 +117,13 @@ class GameLoop:
                         if self.state.dialog_visible:
                             self.state.close_dialog()
                         else:
+                            near_market_stand = self.is_near_point((217, 173), radius=12)
                             npc = self._nearest_npc_in_range()
                             if npc is not None:
                                 self.state.open_rumor_dialog()
+                            if near_market_stand:
+                                for vendor in eb.VENDORS:
+                                    self.state.set_dialog(api.get_buy_snapshot(vendor))
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         if self.current_map == "main" and getattr(self.player, "near_building", None):
