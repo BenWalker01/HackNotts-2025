@@ -1,0 +1,13 @@
+[
+  { "text": "A dragon’s hoard lies near the old quarry.", "truth_prob": 0.35, "event_key_hint": "dragon_sighting" },
+  { "text": "Monks plan a great fair at week’s end.",       "truth_prob": 0.50, "event_key_hint": "mage_conclave" },
+  { "text": "The duke will host a grand tournament.",       "truth_prob": 0.55, "event_key_hint": "royal_tournament" },
+  { "text": "Caravans are stuck at the mountain pass.",     "truth_prob": 0.45, "event_key_hint": "caravan_arrival" },
+  { "text": "Bandits left the valley—roads are safe now.",  "truth_prob": 0.40, "event_key_hint": "bandit_raids" },
+
+  { "text": "A miracle crop is curing blights overnight.",  "truth_prob": 0.30 },
+  { "text": "Tavernkeeper waters the ale; don’t overpay.",  "truth_prob": 0.50 },
+  { "text": "The guild will tax salt next week.",           "truth_prob": 0.45 },
+  { "text": "A foreign prince collects rare crystals.",     "truth_prob": 0.40, "event_key_hint": "mage_conclave" },
+  { "text": "Hunters saw tracks as big as barrels.",        "truth_prob": 0.35, "event_key_hint": "bountiful_hunt" }
+]

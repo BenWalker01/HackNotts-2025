@@ -16,9 +16,40 @@
     "cat_multipliers": { "agricultural": 1.18, "processed": 1.10 }
   },
   {
-  "key": "bandit_raids",
-  "text": "Bandits prowl the roads. Risky to haul valuables—luxury prices climb.",
-  "cat_multipliers": { "luxury": 1.15, "textile": 1.06 },
-  "item_multipliers": { "spices": 1.12, "salt": 1.08 }
+    "key": "bandit_raids",
+    "text": "Bandits prowl the roads. Risky to haul valuables—luxury prices climb.",
+    "cat_multipliers": { "luxury": 1.15, "textile": 1.06 },
+    "item_multipliers": { "spices": 1.12, "salt": 1.08 }
+  },
+
+  { "key": "caravan_arrival",
+    "text": "A caravan from the south arrives—textiles and spices are plentiful.",
+    "cat_multipliers": { "textile": 0.92, "luxury": 0.96 },
+    "item_multipliers": { "spices": 0.90 }
+  },
+  { "key": "smithy_commission",
+    "text": "The castle orders new arms—smiths pay well for metal and gear.",
+    "cat_multipliers": { "crafted": 1.08 },
+    "item_multipliers": { "iron": 1.18, "sword": 1.12, "shield": 1.10, "chainmail": 1.10 }
+  },
+  { "key": "royal_tournament",
+    "text": "A royal tourney draws knights—arms and armor demand surges.",
+    "cat_multipliers": { "crafted": 1.10 },
+    "item_multipliers": { "sword": 1.15, "plate_armor": 1.18, "shield": 1.10, "bow": 1.08, "arrows": 1.08 }
+  },
+  { "key": "mage_conclave",
+    "text": "Magi convene in the cloister—potions and arcane curios fetch more.",
+    "cat_multipliers": { "special": 1.10, "luxury": 1.06 },
+    "item_multipliers": { "potions": 1.15, "mana_crystal": 1.12, "rune_stone": 1.10 }
+  },
+  { "key": "bountiful_hunt",
+    "text": "The lord’s hunt returns laden—leather and dried meats are abundant.",
+    "cat_multipliers": { "textile": 0.97, "processed": 0.96 },
+    "item_multipliers": { "leather": 0.90 }
+  },
+  { "key": "dragon_sighting",
+    "text": "Whispers of a wyrm in the hills—exotic curios soar in price.",
+    "cat_multipliers": { "luxury": 1.10, "special": 1.06 },
+    "item_multipliers": { "dragon_scales": 1.25, "mana_crystal": 1.12 }
   }
 ]

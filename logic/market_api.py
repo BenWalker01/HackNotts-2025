@@ -1,8 +1,8 @@
 from .trading_logic import Market
-from storage_system import StorageManager
-from npc_deals import NPCDealManager
-from progression import ProgressionTracker
-from upgrades import UpgradeShop
+from .storage_system import StorageManager
+from .npc_deals import NPCDealManager
+from .progression import ProgressionTracker
+from .upgrades import UpgradeShop
 
 _market = None
 _storage = None
@@ -10,11 +10,10 @@ _npc_deals = None
 _progression = None
 _upgrades = None
 
-def init(seed: int | None = None):
-    # no seed used yet, but kept for future
+def init(seed: int | None = 44):
     global _market, _storage, _npc_deals, _progression, _upgrades
     if _market is None:
-        _market = Market()
+        _market = Market(seed)
         _storage = StorageManager(seed)
         _npc_deals = NPCDealManager(seed)
         _progression = ProgressionTracker()
@@ -39,29 +38,31 @@ def buy(vendor: str, item: str, qty: int = 1):
 def sell(vendor: str, item: str, qty: int = 1):
     return _market.sell(vendor, item, qty)
 
-def advance_day():
-    # B will add this; call safely for now
-    if hasattr(_market, "advance_day"):
-        _market.advance_day()
-    if hasattr(_market, "get_rumors_today"):
-        return _market.get_rumors_today()
-    return ["All quiet on the trade winds."]
-
 def get_player_state():
     return _market.get_player_summary()
+
+def force_event(key: str | None):
+    """Debug: force an event by key (or None to clear)."""
+    return _market.force_event(key)
+
+def list_events():
+    """Debug: list available event keys."""
+    return _market.list_event_keys()
 
 """ NEW API ADDITIONS BELOW (AMR)"""
 
 def get_storage_info():
+    ps = _market.get_player_summary()  # gold, weight, capacity, inventory
     return {
-        "carrying_capacity": _storage.carrying_capacity,
-        "carrying_used": sum(_market.player_inv.values()),
-        "carrying_remaining": _storage.get_carrying_remaining(_market.player_inv),
         "home_capacity": _storage.get_total_home_capacity(),
         "home_used": _storage.get_home_storage_used(),
         "home_remaining": _storage.get_home_storage_remaining(),
         "home_storage": dict(_storage.home_storage),
         "guard_active": _storage.guard_service_active,
+        # weight-based carry (source of truth = Market)
+        "carrying_capacity": ps["capacity"],
+        "carrying_used": ps["weight"],
+        "carrying_remaining": max(0.0, ps["capacity"] - ps["weight"]),
     }
 
 def store_item(item: str, qty: int):
@@ -77,14 +78,13 @@ def store_item(item: str, qty: int):
     return True
 
 def retrieve_item(item: str, qty: int):
-    """Move item from home storage to player inventory."""
-    remaining = _storage.get_carrying_remaining(_market.player_inv)
-    if remaining < qty:
-        raise ValueError(f"Can only carry {remaining} more items")
-    
+    weight = _market._item_weight(item) * qty
+    ps = _market.get_player_summary()
+    new_weight = ps["weight"] + weight
+    if new_weight > ps["capacity"]:
+        raise ValueError(f"Inventory too heavy ({new_weight:.1f}/{ps['capacity']:.1f})")
     _storage.retrieve_item(item, qty)
     _market.player_inv[item] = _market.player_inv.get(item, 0) + qty
-    
     return True
 
 def hire_guard():
@@ -197,20 +197,13 @@ def advance_day():
     # Advance NPC deals
     _npc_deals.advance_day()
     
-    # Get rumors
-    rumors = []
-    if hasattr(_market, "get_rumors_today"):
-        rumors = _market.get_rumors_today()
+    news = _market.get_news_today()
+    rumors = _market.get_rumors_today()
     
-    # Build event summary
-    events = {
-        "rumors": rumors,
-        "theft": {
-            "occurred": theft_occurred,
-            "stolen": stolen_items,
-            "loss_value": loss,
-        },
+    return {
+        "news": news,
+        "rumors": rumors,    
+        "theft": {"occurred": theft_occurred, "stolen": stolen_items, "loss_value": loss},
         "new_deal": _npc_deals.get_active_deal() is not None,
+        "status": _progression.get_game_status(_market.player_gold)
     }
-    
-    return events

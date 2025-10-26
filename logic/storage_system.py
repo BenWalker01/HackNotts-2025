@@ -9,11 +9,8 @@ class StorageManager:
     def __init__(self, seed=None):
         self.rng = random.Random(seed)
         
-        # Carrying capacity
-        self.carrying_capacity = 5
-        
         # Home storage
-        self.home_capacity = 10
+        self.home_capacity = 12
         self.home_storage = {}  # {item: quantity}
         
         # Upgrades
@@ -43,16 +40,6 @@ class StorageManager:
     def get_home_storage_remaining(self):
         """Get available home storage space."""
         return self.get_total_home_capacity() - self.get_home_storage_used()
-    
-    def can_carry_more(self, player_inv):
-        """Check if player can carry more items."""
-        total_carried = sum(player_inv.values())
-        return total_carried < self.carrying_capacity
-    
-    def get_carrying_remaining(self, player_inv):
-        """Get remaining carrying capacity."""
-        total_carried = sum(player_inv.values())
-        return self.carrying_capacity - total_carried
     
     # ---------- Storage operations ----------
     
@@ -135,7 +122,7 @@ class StorageManager:
     
     # ---------- Guard service ----------
     
-    def hire_guard(self, player_gold, cost=2):
+    def hire_guard(self, player_gold, cost=3):
         """Hire guard service for one day."""
         if player_gold < cost:
             raise ValueError("Not enough gold to hire guard")
