@@ -131,9 +131,13 @@ class GameLoop:
                                 self.state.open_rumor_dialog()
                             elif near_market_stand:
                                 # Show first vendor's inventory
-                                first_vendor = list(eb.VENDORS.keys())[0]
-                                formatted_text = self.state.format_buy_snapshot(first_vendor)
-                                self.state.set_dialog(formatted_text)
+                                vendor_keys = list(eb.VENDORS.keys())
+                                if vendor_keys:
+                                    first_vendor = vendor_keys[0]
+                                    formatted_text = self.state.format_buy_snapshot(first_vendor)
+                                    self.state.set_dialog(formatted_text)
+                                else:
+                                    self.state.set_dialog("No vendors available.")
 
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                         if self.current_map == "main" and getattr(self.player, "near_building", None):
