@@ -1,6 +1,5 @@
 # game_state.py
 import pygame
-from logic import market_api as api
 import logic.market_api as api
 
 class GameState:
@@ -48,6 +47,25 @@ class GameState:
 
     def close_dialog(self):
         self.dialog_visible = False
+    
+    def format_buy_snapshot(self, vendor_name: str) -> str:
+        """Format buy snapshot data from API into readable text."""
+        try:
+            snapshot = api.get_buy_snapshot(vendor_name)
+            if not snapshot:
+                return f"{vendor_name} has nothing in stock right now."
+            
+            lines = [f"{vendor_name}'s Wares:", ""]
+            for item_data in snapshot:
+                item_name = item_data.get("item", "Unknown")
+                qty = item_data.get("qty", 0)
+                price = item_data.get("buy_price", 0)
+                weight = item_data.get("weight", 0)
+                lines.append(f"{item_name}: {qty} available @ {price}g each (wt: {weight:.1f})")
+            
+            return "\n".join(lines)
+        except Exception as e:
+            return f"Error loading {vendor_name}'s inventory: {str(e)}"
         
     def handle_interaction(self, player):
         """Called when player presses E near something."""
